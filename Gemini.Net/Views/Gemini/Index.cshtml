@@ -1,0 +1,47 @@
+﻿@model Gemini.Net.Models.GeminiPrompt
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<h4>GeminiPrompt</h4>
+
+<h6>@ViewBag.Menu</h6>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post" asp-action="PostPrompt">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Id" class="control-label"></label>
+                <input asp-for="Id" class="form-control" />
+                <span asp-validation-for="Id" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Prompt" class="control-label"></label>
+                <input asp-for="Prompt" class="form-control" />
+                <span asp-validation-for="Prompt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+       
+    </div>
+</div>
+@if(Model.Prompt is not null)
+{
+    <div class="justify-content-center align-content-center">
+        <p class=" fw-bold">Resposta</p>
+        <p>@Html.DisplayFor(model => model.Response)</p>
+    </div>
+}
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

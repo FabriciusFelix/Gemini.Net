@@ -1,35 +1,54 @@
 ﻿using Gemini.Net.Models;
+using GeminiCSharp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace Gemini.Net.Controllers
 {
     public class GeminiController : Controller
     {
-        // GET: GeminiController
-        public IActionResult Index()
+        private readonly IConfiguration _configuration;
+        public GeminiController(IConfiguration configuration)
         {
-            return View();
+            _configuration = configuration;
         }
- 
-        public IActionResult EnviaPromptPage()
+        // GET: GeminiController
+        public IActionResult Index(GeminiPrompt prompt)
         {
-            return View();
+            var menu = "Faça sua pergunta para o Gemini: ";
+            ViewBag.Menu = menu;
+            return View(prompt); 
         }
 
          
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult PostPrompt(IFormCollection collection)
+        public async Task<IActionResult> PostPrompt([Bind("Id,Prompt")]GeminiPrompt form)
         {
-            var prompt = new Gemini.Net.Models.Gemini(1,"Quem é você?");
             try
             {
-                return RedirectToAction(nameof(Index));
+                var apiKey = _configuration.GetValue<string>("API_KEY");
+                var geminiChat = new GeminiChat(apiKey);
+
+                 
+               
+                using var httpClient = new HttpClient();
+
+
+                var response = await geminiChat.SendMessageAsync(form.Prompt, httpClient);
+                if (response is not null)
+                {
+                    form.Response = response;
+                    return View("Index",form);
+                }
+                Console.WriteLine($"[Gemini]: {form}");
+                geminiChat.ResetToNewChat();
+                return View("Index");
             }
             catch
             {
-                return View(EnviaPromptPage());
+                return View("Index");
             }
         }
 
